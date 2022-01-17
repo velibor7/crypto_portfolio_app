@@ -27,7 +27,7 @@ jwt = JWTManager(app)
 @socketio.on("connect", namespace="/home")
 def frontend_connection():
     print("Client is Connected")
-    # socketio.emit("connect", {"hello": "world"})
+    socketio.emit("connect", {"hello": "world"})
 
 @socketio.on("disconnect", namespace="/home")
 def frontend_disconnection():
@@ -38,11 +38,14 @@ def send_updates():
     socketio.emit("newdata", {'msg': str(datetime.now())}, namespace='/home', broadcast=True)
     # print("i am executed now " + str(datetime.now()))
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(  func=send_updates, 
-                    trigger='interval', 
-                    seconds=5)
-scheduler.start()
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(  func=send_updates, 
+                    # trigger='interval', 
+                    # seconds=5)
+# scheduler.start()
+
+# probacu bez namespace
+
 
 
 
@@ -148,4 +151,5 @@ def remove_investment(id):
 
 if __name__ == '__main__':
     # app.run(debug=True)
+    send_updates()
     socketio.run(app, debug=True)
