@@ -95,12 +95,27 @@ def refresh_expiring_jwts(response):
 
 @app.route('/token', methods=["POST"])
 def create_token():
-    email = request.json.get("email", None)
+    # changed to username instead of email for testing purposes
+    username = request.json.get("email", None)
+    print(username)
     password = request.json.get("password", None)
-    if email != "test" or password != "test":
-        return {"msg": "Wrong email or password"}, 401
+    print(password)
 
-    access_token = create_access_token(identity=email)
+    if (username or password) is None:
+        return {"msg": "Email or password cant be none"}, 401
+
+    try:
+        user = User.get_instance_by_username(username)
+        print(user)
+    except AttributeError:
+        return {"msg": "Cant find user with that username"}, 401
+
+    if not user.verify_password(password):
+        return {"msg": "Password is not valid"}, 401
+    # if username != "test" or password != "test":
+        # return {"msg": "Wrong email or password"}, 401
+
+    access_token = create_access_token(identity=username)
     response = {"access_token": access_token}
     return response
 

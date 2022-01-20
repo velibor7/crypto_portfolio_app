@@ -17,7 +17,8 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    username = db.Column(db.String(32), index=True)
+    username = db.Column(db.String(32), index=True, unique=True)
+    # email = db.Column(db.String(64), unique=True)
     password_hash = db.Column(db.String(128))
     investments = db.relationship('Investment', backref='user')
     portfolio_value = db.relationship('PortfolioValue', backref='user')
@@ -28,9 +29,9 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
-    def generate_auth_token(self, expiration=600):
-        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        return s.dumps({'id': self.id})
+    # def generate_auth_token(self, expiration=600):
+        # s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+        # return s.dumps({'id': self.id})
 
     def json(self):
         return {'id': self.id,
@@ -47,23 +48,14 @@ class User(UserMixin, db.Model):
     def get_by_id(_id):
         return User.json(User.query.filter_by(id=_id).first())
     
+    def get_by_username(_username):
+        return User.json(User.query.filter_by(username=_username).first())
+
+    def get_instance_by_username(_username):
+        return User.query.filter_by(username=_username).first()
+
     def get_id_by_email(_email):
         pass
-
-    #! token auth
-    # @staticmethod
-    # def verify_auth_token(token):
-        # s = Serializer(app.config['SECRET_KEY'])
-        # try:
-            # data = s.loads(token)
-        # except SignatureExpired:
-            # return None
-        # except BadSignature:
-            # return None
-        # except Exception as e:
-            # print(e)
-        # user = User.query.get(data['id'])
-        # return user
 
 
 class PortfolioValue(db.Model):
