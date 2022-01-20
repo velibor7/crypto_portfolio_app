@@ -9,6 +9,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer,
                             BadSignature, SignatureExpired)
 
 from settings import *
+from sqlalchemy import desc
 
 db = SQLAlchemy(app)
 
@@ -19,7 +20,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(128))
     investments = db.relationship('Investment', backref='user')
-    # portfolio_value = db.relationship('PortfolioValue', backref='user')
+    portfolio_value = db.relationship('PortfolioValue', backref='user')
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -42,6 +43,12 @@ class User(UserMixin, db.Model):
     def get_all():
         # [Investment.json(investment) for investment in Investment.query.filter_by(user_id=_user_id, deleted=False)]
         return [User.json(user) for user in User.query.all()]
+
+    def get_by_id(_id):
+        return User.json(User.query.filter_by(id=_id).first())
+    
+    def get_id_by_email(_email):
+        pass
 
     #! token auth
     # @staticmethod
@@ -80,9 +87,12 @@ class PortfolioValue(db.Model):
         new_pf = PortfolioValue(user_id=user_id, value=value, date=datetime.now())
         db.session.add(new_pf)
         db.session.commit()
+    
+    def get_all_by_user_id(_user_id):
+        return [PortfolioValue.json(pv) for pv in PortfolioValue.query.filter_by(user_id=_user_id).order_by(desc('date'))]
 
-    def get_by_user(user_id):
-        PortfolioValue.filter_by(user_id=user_id).order_by('date').first()
+    def get_last_by_user(_user_id):
+        return PortfolioValue.json(PortfolioValue.query.filter_by(user_id=_user_id).order_by(desc('date')).first())
 
 
 class Investment(db.Model):
@@ -112,12 +122,12 @@ class Investment(db.Model):
         db.session.add(new_investment)
         db.session.commit()
 
-    def get_all_investments_by_user(_user_id):
+    def get_all_by_user_id(_user_id):
         return [Investment.json(investment) for investment in Investment.query.filter_by(user_id=_user_id, deleted=False)]
         # return [Investment.json(investment) for investment in Investment.filter(Investment.user_id==_user_id, Investment.deleted==False)]
 
-    def get_investment_by_id(_id):
-        return [Investment.json(Investment.query.filter_by(id=_id).first())]
+    def get_by_id(_id):
+        return Investment.json(Investment.query.filter_by(id=_id).first())
 
     # todo: write this method so that it accepts key-value pairs
     def update_investment(_id, _name, _short_name_handle, _price, _amount):

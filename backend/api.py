@@ -24,17 +24,29 @@ jwt = JWTManager(app)
 # mozda bismo mogli da dodamo neki flag koji ce biti dosta da proverimo
 # taj flag bismo vratili na 0 cim posaljemo podatke na frontend
 
+"""
+scheduler = BackgroundScheduler()
+scheduler.add_job(  func=calculate_all_portfolio_values, 
+                    trigger='interval', 
+                    seconds=60)
+scheduler.start()
 
-# ! sse
-@app.route("/stream", methods=["POST"])
-def stream():
+# flag = 0
+
+# todo: nije optimalan nacin da se radi
+@app.route("/stream/<int:uid>", methods=["POST"])
+def stream(uid):
     def eventStream():
+        stara_duzina = PortfolioValue.get_all_by_user_id(uid)
+        # global flag
         while True:
-            # poll data from the db and see if there is a new message
-            time.sleep(3)
-            yield "data: idk some data \n\n"
+            nova_duzina = PortfolioValue.get_all_by_user_id(uid)
+            if len(nova_duzina) > len(stara_duzina):
+                data = Investment.get_all_by_user_id(uid)
+                yield f"data: {data}\n\n"
     return Response(eventStream(), mimetype='application/event-stream')
 
+"""
 
 """scheduler - works
 scheduler = BackgroundScheduler()
@@ -65,7 +77,6 @@ scheduler.add_job(  func=send_updates,
                     trigger='interval', 
                     seconds=15)
 scheduler.start()
-
 """
 
 #! auth

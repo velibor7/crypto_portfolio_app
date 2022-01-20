@@ -1,16 +1,16 @@
 import axios from "axios";
 
-
 import './Header.css'
 
-function Header(props) {
+const Header = (props) => {
 
-  function logMeOut() {
+  const logMeOut = () => {
     axios({
       method: "POST",
-      url:"/logout",
+      url:"http://localhost:5000/logout",
     })
     .then((response) => {
+      console.log("ovde sam")
        props.token()
     }).catch((error) => {
       if (error.response) {

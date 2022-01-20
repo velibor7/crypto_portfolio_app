@@ -56,13 +56,8 @@ def calculate_portfolio_value(user_id):
                     instance['quote']['USD']['price'],
                     my_investment['amount'])
                 total_value += my_investment['amount'] * instance['quote']['USD']['price']
-                # print(f'{my_investment["short_name_handle"]} amount:{my_investment["amount"]} old_price:{my_investment["price"]} new_price:{instance["quote"]["USD"]["price"]}')
-            else:
-                print("unable to update investment value")
-                continue
 
     PortfolioValue.add_portfolio_value(user_id, total_value)
-    # print(total_value)
 
 def calculate_all_portfolio_values():
     get_data_from_cmp() # dobijamo data fajl
@@ -75,5 +70,4 @@ def calculate_all_portfolio_values():
     print("\033[1m" + f"{b.OK}PORTFOLIO VALUES UPDATED - {datetime.now()}{b.END}" + "\033[0m")
 
 if __name__ == '__main__':
-    pass
-    # calculate_all_portfolio_values() # should be executed every 1 hour
+    calculate_all_portfolio_values() # should be executed every 1 hour
