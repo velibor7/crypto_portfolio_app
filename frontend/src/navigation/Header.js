@@ -10,7 +10,6 @@ const Header = (props) => {
       url:"http://localhost:5000/logout",
     })
     .then((response) => {
-      console.log("ovde sam")
        props.token()
     }).catch((error) => {
       if (error.response) {
