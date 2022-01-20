@@ -1,1 +1,1 @@
-# crypto portfoli app
+# crypto portfolio app
