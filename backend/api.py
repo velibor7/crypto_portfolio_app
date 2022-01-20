@@ -10,20 +10,41 @@ from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
                                unset_jwt_cookies, jwt_required, JWTManager
 
-
+import time
 from models import *
 from cmp import *
 
 
 jwt = JWTManager(app)
 
-#!scheduler - works
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(  func=calculate_all_portfolio_values, 
-                    # trigger='interval', 
-                    # seconds=60)
-# scheduler.start()
+# pozovemo api
+# prilikom poziva apia, update sve investmente za svakog usera i portfolio value entitet
+# ako se prilikom promene duzine podataka iz baze nesto promenilo
+# saljemo na frontend
+# mozda bismo mogli da dodamo neki flag koji ce biti dosta da proverimo
+# taj flag bismo vratili na 0 cim posaljemo podatke na frontend
 
+
+# ! sse
+@app.route("/stream", methods=["POST"])
+def stream():
+    def eventStream():
+        while True:
+            # poll data from the db and see if there is a new message
+            time.sleep(3)
+            yield "data: idk some data \n\n"
+    return Response(eventStream(), mimetype='application/event-stream')
+
+
+"""scheduler - works
+scheduler = BackgroundScheduler()
+scheduler.add_job(  func=calculate_all_portfolio_values, 
+                    trigger='interval', 
+                    seconds=60)
+scheduler.start()
+"""
+
+""" socket io and send updates
 @socketio.on("connect", namespace="/home")
 def frontend_connection():
     print("Client is Connected")
@@ -35,22 +56,19 @@ def frontend_disconnection():
 
 # @socketio.on("newdata", namespace="/home")
 def send_updates():
-    socketio.emit("newdata", {'msg': str(datetime.now())}, namespace='/home', broadcast=True)
+    socketio.emit("newdata", "some string", namespace='/home', broadcast=True)
+    socketio.sleep(0)
     # print("i am executed now " + str(datetime.now()))
 
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(  func=send_updates, 
-                    # trigger='interval', 
-                    # seconds=5)
-# scheduler.start()
+scheduler = BackgroundScheduler()
+scheduler.add_job(  func=send_updates, 
+                    trigger='interval', 
+                    seconds=15)
+scheduler.start()
 
-# probacu bez namespace
+"""
 
-
-
-
-#! AUTH
-
+#! auth
 @app.after_request
 def refresh_expiring_jwts(response):
     try:
@@ -63,7 +81,6 @@ def refresh_expiring_jwts(response):
     except (RuntimeError, KeyError):
         # no valid jwt, just return original res
         return response
-
 
 @app.route('/token', methods=["POST"])
 def create_token():
@@ -92,8 +109,7 @@ def auth_test():
 
     return response_body
 
-#! ROUTES
-
+#! routes
 @app.route('/users', methods=['POST'])
 def new_user():
     name = request.json.get('name')
@@ -150,6 +166,4 @@ def remove_investment(id):
     return reponse
 
 if __name__ == '__main__':
-    # app.run(debug=True)
-    send_updates()
-    socketio.run(app, debug=True)
+    app.run(debug=True)

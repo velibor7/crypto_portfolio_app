@@ -119,6 +119,7 @@ class Investment(db.Model):
     def get_investment_by_id(_id):
         return [Investment.json(Investment.query.filter_by(id=_id).first())]
 
+    # todo: write this method so that it accepts key-value pairs
     def update_investment(_id, _name, _short_name_handle, _price, _amount):
         investment_to_update = Investment.query.filter_by(id=_id).first()
         investment_to_update.name = _name

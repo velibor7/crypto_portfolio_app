@@ -19,7 +19,7 @@ CORS(app)
     # "/*": api_v1_config
 # })
 
-socketio = SocketIO(app, logger=True, cors_allowed_origins="*")
+# socketio = SocketIO(app, logger=True, engineio_logger=True, cors_allowed_origins="*")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

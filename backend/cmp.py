@@ -25,6 +25,7 @@ session.headers.update(headers)
 
 
 def get_data_from_cmp():
+    '''Gets data from coin market cap and save it to the data.json'''
     try:
         response = session.get(url, params=parameters)
         data = json.loads(response.text)
@@ -35,19 +36,30 @@ def get_data_from_cmp():
         print(e)
 
 def calculate_portfolio_value(user_id):
+    '''Updates investments of a user and makes a new portfoliovalue entry in the db'''
     f = open('data.json')
     data = json.load(f)
     f.close()
 
     total_value = 0
-
     investments_list = Investment.get_all_investments_by_user(user_id)
 
+    # ovo ovde postoji bolji nacin da se napise
     for my_investment in investments_list:
         for instance in data['data']:
             if my_investment['short_name_handle'] == instance['symbol']:
-                # print(f'{my_investment["short_name_handle"]} amount:{my_investment["amount"]} old_price:{my_investment["price"]} new_price:{instance["quote"]["USD"]["price"]}')
+                # update my_investments price
+                Investment.update_investment(
+                    my_investment['id'], 
+                    my_investment['name'], 
+                    my_investment['short_name_handle'],
+                    instance['quote']['USD']['price'],
+                    my_investment['amount'])
                 total_value += my_investment['amount'] * instance['quote']['USD']['price']
+                # print(f'{my_investment["short_name_handle"]} amount:{my_investment["amount"]} old_price:{my_investment["price"]} new_price:{instance["quote"]["USD"]["price"]}')
+            else:
+                print("unable to update investment value")
+                continue
 
     PortfolioValue.add_portfolio_value(user_id, total_value)
     # print(total_value)
@@ -64,4 +76,4 @@ def calculate_all_portfolio_values():
 
 if __name__ == '__main__':
     pass
-    # calculate_all_portfolio_values()
+    # calculate_all_portfolio_values() # should be executed every 1 hour
