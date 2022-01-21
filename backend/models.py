@@ -18,7 +18,6 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     username = db.Column(db.String(32), index=True, unique=True)
-    # email = db.Column(db.String(64), unique=True)
     password_hash = db.Column(db.String(128))
     investments = db.relationship('Investment', backref='user')
     portfolio_value = db.relationship('PortfolioValue', backref='user')
@@ -53,9 +52,6 @@ class User(UserMixin, db.Model):
 
     def get_instance_by_username(_username):
         return User.query.filter_by(username=_username).first()
-
-    def get_id_by_email(_email):
-        pass
 
 
 class PortfolioValue(db.Model):
@@ -116,7 +112,6 @@ class Investment(db.Model):
 
     def get_all_by_user_id(_user_id):
         return [Investment.json(investment) for investment in Investment.query.filter_by(user_id=_user_id, deleted=False)]
-        # return [Investment.json(investment) for investment in Investment.filter(Investment.user_id==_user_id, Investment.deleted==False)]
 
     def get_by_id(_id):
         return Investment.json(Investment.query.filter_by(id=_id).first())

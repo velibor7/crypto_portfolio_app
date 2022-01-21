@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import axios from "axios";
 
-function Login(props) {
+const Login = (props) => {
 
     const [loginForm, setloginForm] = useState({
       email: "",
       password: ""
     })
 
-    function logMeIn(event) {
+    const logMeIn = (event) => {
       axios({
         method: "POST",
         url:"http://localhost:5000/token",
@@ -18,7 +18,7 @@ function Login(props) {
          }
       })
       .then((response) => {
-        props.setToken(response.data.access_token)
+        props.setToken(response.data.access_token, response.data.user_id)
       }).catch((error) => {
         if (error.response) {
           console.log(error.response)
@@ -34,7 +34,7 @@ function Login(props) {
       event.preventDefault()
     }
 
-    function handleChange(event) { 
+    const handleChange = (event) => { 
       const {value, name} = event.target
       setloginForm(prevNote => ({
           ...prevNote, [name]: value})

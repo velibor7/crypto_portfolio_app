@@ -1,85 +1,44 @@
-from flask import Flask, request, Response, jsonify, g
-from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO
-from flask_socketio import send, emit
-from flask_sse import sse
-from flask_cors import cross_origin
-# from flask_httpauth import HTTPBasicAuth
+import config
+from flask import request, Response, jsonify
+# from flask_sqlalchemy import SQLAlchemy
+# from flask_socketio import SocketIO
+# from flask_socketio import send, emit
+# from flask_sse import sse
+# from flask_cors import cross_origin
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta, timezone
-from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
-                               unset_jwt_cookies, jwt_required, JWTManager
+from flask_jwt_extended import (create_access_token, \
+                                get_jwt, \
+                                get_jwt_identity, \
+                                unset_jwt_cookies, \
+                                jwt_required, \
+                                JWTManager)
 
-import time
 from models import *
-from cmp import *
+from cmp import calculate_all_portfolio_values
 
 
 jwt = JWTManager(app)
 
-# pozovemo api
-# prilikom poziva apia, update sve investmente za svakog usera i portfolio value entitet
-# ako se prilikom promene duzine podataka iz baze nesto promenilo
-# saljemo na frontend
-# mozda bismo mogli da dodamo neki flag koji ce biti dosta da proverimo
-# taj flag bismo vratili na 0 cim posaljemo podatke na frontend
-
-"""
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone="Europe/Belgrade")
 scheduler.add_job(  func=calculate_all_portfolio_values, 
                     trigger='interval', 
                     seconds=60)
 scheduler.start()
-
-# flag = 0
 
 # todo: nije optimalan nacin da se radi
 @app.route("/stream/<int:uid>", methods=["POST"])
 def stream(uid):
     def eventStream():
-        stara_duzina = PortfolioValue.get_all_by_user_id(uid)
-        # global flag
+        print(f"connected uid: {uid}")
         while True:
-            nova_duzina = PortfolioValue.get_all_by_user_id(uid)
-            if len(nova_duzina) > len(stara_duzina):
+            if config.updated_flag == 1:
                 data = Investment.get_all_by_user_id(uid)
+                print(f"yielding new data now | time: {datetime.now()}")
+                config.updated_flag = 0
                 yield f"data: {data}\n\n"
     return Response(eventStream(), mimetype='application/event-stream')
 
-"""
-
-"""scheduler - works
-scheduler = BackgroundScheduler()
-scheduler.add_job(  func=calculate_all_portfolio_values, 
-                    trigger='interval', 
-                    seconds=60)
-scheduler.start()
-"""
-
-""" socket io and send updates
-@socketio.on("connect", namespace="/home")
-def frontend_connection():
-    print("Client is Connected")
-    socketio.emit("connect", {"hello": "world"})
-
-@socketio.on("disconnect", namespace="/home")
-def frontend_disconnection():
-    print("Client is Disconnected")
-
-# @socketio.on("newdata", namespace="/home")
-def send_updates():
-    socketio.emit("newdata", "some string", namespace='/home', broadcast=True)
-    socketio.sleep(0)
-    # print("i am executed now " + str(datetime.now()))
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(  func=send_updates, 
-                    trigger='interval', 
-                    seconds=15)
-scheduler.start()
-"""
-
-#! auth
 @app.after_request
 def refresh_expiring_jwts(response):
     try:
@@ -107,6 +66,7 @@ def create_token():
     try:
         user = User.get_instance_by_username(username)
         print(user)
+        print(user.id)
     except AttributeError:
         return {"msg": "Cant find user with that username"}, 401
 
@@ -116,7 +76,7 @@ def create_token():
         # return {"msg": "Wrong email or password"}, 401
 
     access_token = create_access_token(identity=username)
-    response = {"access_token": access_token}
+    response = {"access_token": access_token, "user_id": user.id}
     return response
 
 @app.route("/logout", methods=["POST"])
@@ -125,6 +85,7 @@ def logout():
     unset_jwt_cookies(response)
     return response
 
+#todo delete this 
 @app.route('/auth_test')
 @jwt_required()
 def auth_test():
@@ -192,4 +153,4 @@ def remove_investment(id):
     return reponse
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

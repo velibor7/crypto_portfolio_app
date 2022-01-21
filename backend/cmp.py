@@ -1,7 +1,7 @@
-import bcolors as b
 import json
 import datetime
-
+import bcolors as b
+import config
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 
@@ -42,7 +42,7 @@ def calculate_portfolio_value(user_id):
     f.close()
 
     total_value = 0
-    investments_list = Investment.get_all_investments_by_user(user_id)
+    investments_list = Investment.get_all_by_user_id(user_id)
 
     # ovo ovde postoji bolji nacin da se napise
     for my_investment in investments_list:
@@ -58,6 +58,7 @@ def calculate_portfolio_value(user_id):
                 total_value += my_investment['amount'] * instance['quote']['USD']['price']
 
     PortfolioValue.add_portfolio_value(user_id, total_value)
+    config.updated_flag = 1
 
 def calculate_all_portfolio_values():
     get_data_from_cmp() # dobijamo data fajl
@@ -68,6 +69,3 @@ def calculate_all_portfolio_values():
         calculate_portfolio_value(user['id'])
 
     print("\033[1m" + f"{b.OK}PORTFOLIO VALUES UPDATED - {datetime.now()}{b.END}" + "\033[0m")
-
-if __name__ == '__main__':
-    calculate_all_portfolio_values() # should be executed every 1 hour
