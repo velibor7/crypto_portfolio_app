@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_socketio import SocketIO
 from datetime import timedelta
 from models import *
 
@@ -18,8 +17,6 @@ CORS(app)
 # CORS(app, resources={
     # "/*": api_v1_config
 # })
-
-# socketio = SocketIO(app, logger=True, engineio_logger=True, cors_allowed_origins="*")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

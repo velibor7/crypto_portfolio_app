@@ -1,26 +1,24 @@
-from hashlib import new
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-# from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.apps import custom_app_context as pwd_context
 from datetime import datetime
-
-from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer,
-                            BadSignature, SignatureExpired)
-
 from settings import *
 from sqlalchemy import desc
+
+# from hashlib import new
+# from werkzeug.security import generate_password_hash, check_password_hash
+# from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 db = SQLAlchemy(app)
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     username = db.Column(db.String(32), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    investments = db.relationship('Investment', backref='user')
-    portfolio_value = db.relationship('PortfolioValue', backref='user')
+    investments = db.relationship("Investment", backref="user")
+    portfolio_value = db.relationship("PortfolioValue", backref="user")
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -28,20 +26,15 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
-    # def generate_auth_token(self, expiration=600):
-        # s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        # return s.dumps({'id': self.id})
-
     def json(self):
-        return {'id': self.id,
-                'name': self.name,
-                'username': self.username,
-                # 'investments': Investment.json(Investment.get_all_investments_by_user(self.id)),
-                # 'portfolio_value': PortfolioValue.get_by_user(self.id)
+        return {"id": self.id,
+                "name": self.name,
+                "username": self.username,
+                # "investments": Investment.json(Investment.get_all_investments_by_user(self.id)),
+                # "portfolio_value": PortfolioValue.get_by_user(self.id)
         }
 
     def get_all():
-        # [Investment.json(investment) for investment in Investment.query.filter_by(user_id=_user_id, deleted=False)]
         return [User.json(user) for user in User.query.all()]
 
     def get_by_id(_id):
@@ -55,17 +48,17 @@ class User(UserMixin, db.Model):
 
 
 class PortfolioValue(db.Model):
-    __tablename__ = 'portfolio_values'
+    __tablename__ = "portfolio_values"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     value = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.now)
 
     def json(self):
-        return {'id': self.id,
-                'user_id': self.user_id,
-                'value': self.value,
-                'date': self.date,
+        return {"id": self.id,
+                "user_id": self.user_id,
+                "value": self.value,
+                "date": self.date,
         }
 
     def get_all():
@@ -77,14 +70,14 @@ class PortfolioValue(db.Model):
         db.session.commit()
     
     def get_all_by_user_id(_user_id):
-        return [PortfolioValue.json(pv) for pv in PortfolioValue.query.filter_by(user_id=_user_id).order_by(desc('date'))]
+        return [PortfolioValue.json(pv) for pv in PortfolioValue.query.filter_by(user_id=_user_id).order_by(desc("date"))]
 
     def get_last_by_user(_user_id):
-        return PortfolioValue.json(PortfolioValue.query.filter_by(user_id=_user_id).order_by(desc('date')).first())
+        return PortfolioValue.json(PortfolioValue.query.filter_by(user_id=_user_id).order_by(desc("date")).first())
 
 
 class Investment(db.Model):
-    __tablename__ = 'investments'
+    __tablename__ = "investments"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     short_name_handle = db.Column(db.String)
@@ -93,16 +86,16 @@ class Investment(db.Model):
     amount = db.Column(db.Float)
     value = db.Column(db.Float)
     deleted = db.Column(db.Boolean, default=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
+    #"date": self.date,
     def json(self):
-        return {'id': self.id,
-                'name': self.name,
-                'short_name_handle': self.short_name_handle,
-                'date': self.date,
-                'price': self.price,
-                'amount': self.amount,
-                'value': self.value,
+        return {"id": self.id,
+                "name": self.name,
+                "short_name_handle": self.short_name_handle,
+                "price": self.price,
+                "amount": self.amount,
+                "value": self.value,
         }
 
     def add_investment(name, short_name_handle, price, amount, _user_id):

@@ -4,7 +4,7 @@ import axios from "axios";
 const Login = (props) => {
 
     const [loginForm, setloginForm] = useState({
-      email: "",
+      username: "",
       password: ""
     })
 
@@ -13,7 +13,7 @@ const Login = (props) => {
         method: "POST",
         url:"http://localhost:5000/token",
         data:{
-          email: loginForm.email,
+          username: loginForm.username,
           password: loginForm.password
          }
       })
@@ -28,7 +28,7 @@ const Login = (props) => {
       })
 
       setloginForm(({
-        email: "",
+        username: "",
         password: ""}))
 
       event.preventDefault()
@@ -45,11 +45,11 @@ const Login = (props) => {
         <h1>Login</h1>
           <form className="login">
             <input onChange={handleChange} 
-                  type="email"
-                  text={loginForm.email} 
-                  name="email" 
-                  placeholder="Email" 
-                  value={loginForm.email} />
+                  type="text"
+                  text={loginForm.username} 
+                  name="username" 
+                  placeholder="username" 
+                  value={loginForm.username} />
             <input onChange={handleChange} 
                   type="password"
                   text={loginForm.password} 

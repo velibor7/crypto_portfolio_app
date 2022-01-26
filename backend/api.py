@@ -17,18 +17,27 @@ from flask_jwt_extended import (create_access_token, \
 from models import *
 from cmp import calculate_all_portfolio_values
 
+from flask_cors import cross_origin
+
+from werkzeug.serving import WSGIRequestHandler
+
 
 jwt = JWTManager(app)
 
 scheduler = BackgroundScheduler(timezone="Europe/Belgrade")
 scheduler.add_job(  func=calculate_all_portfolio_values, 
                     trigger='interval', 
-                    seconds=60)
+                    seconds=10)
 scheduler.start()
 
 # todo: nije optimalan nacin da se radi
-@app.route("/stream/<int:uid>", methods=["POST"])
+@app.route("/stream/<int:uid>", methods=["POST", "GET"])
+@cross_origin()
 def stream(uid):
+    # if not uid:
+        # # todo not implemented
+        # # 503 - Service Unavailable - server is not ready to handle the req
+        # return {"msg": "UID not provided"}, 503
     def eventStream():
         print(f"connected uid: {uid}")
         while True:
@@ -37,7 +46,7 @@ def stream(uid):
                 print(f"yielding new data now | time: {datetime.now()}")
                 config.updated_flag = 0
                 yield f"data: {data}\n\n"
-    return Response(eventStream(), mimetype='application/event-stream')
+    return Response(eventStream(), mimetype='application/event-stream', headers={"Connection": "Keep-Alive"})
 
 @app.after_request
 def refresh_expiring_jwts(response):
@@ -49,19 +58,18 @@ def refresh_expiring_jwts(response):
             access_token = create_access_token(identity=get_jwt_identity())
         return response
     except (RuntimeError, KeyError):
-        # no valid jwt, just return original res
-        return response
+        return response # no valid jwt, just return original res
 
 @app.route('/token', methods=["POST"])
 def create_token():
     # changed to username instead of email for testing purposes
-    username = request.json.get("email", None)
+    username = request.json.get("username", None)
     print(username)
     password = request.json.get("password", None)
     print(password)
 
     if (username or password) is None:
-        return {"msg": "Email or password cant be none"}, 401
+        return {"msg": "Username or password cant be none"}, 401
 
     try:
         user = User.get_instance_by_username(username)

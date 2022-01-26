@@ -44,7 +44,7 @@ def calculate_portfolio_value(user_id):
     total_value = 0
     investments_list = Investment.get_all_by_user_id(user_id)
 
-    # ovo ovde postoji bolji nacin da se napise
+    # todo: this can be written better
     for my_investment in investments_list:
         for instance in data['data']:
             if my_investment['short_name_handle'] == instance['symbol']:
@@ -61,9 +61,9 @@ def calculate_portfolio_value(user_id):
     config.updated_flag = 1
 
 def calculate_all_portfolio_values():
-    get_data_from_cmp() # dobijamo data fajl
+    get_data_from_cmp() # generates data.json
 
-    users_list = User.get_all() # dobijamo usere
+    users_list = User.get_all()
 
     for user in users_list:
         calculate_portfolio_value(user['id'])
