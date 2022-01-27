@@ -53,7 +53,6 @@ const Portfolio = (props) => {
         // sse.close()
       // }
     }, []);
-    */
 
     useEffect(() => {
       const sse = new EventSource(`${serverBaseURL}/stream/${props.userId}`, );
@@ -83,6 +82,9 @@ const Portfolio = (props) => {
       };
 
     }, []);
+
+    */
+
 
     return (
     <>

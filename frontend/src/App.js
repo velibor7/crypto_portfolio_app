@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Portfolio from './portfolio/pages/Portfolio';
+import Stock from './portfolio/pages/Stock';
 import useAuth from './hooks/useAuth'
 import Login from './auth/Login';
 import Header from './navigation/Header';
@@ -17,8 +18,9 @@ const App = () => {
         <Login setToken={setToken} />
         : (
           <>
-          <Portfolio token={token} userId={userId} />
+          <Stock />
           {/*
+          <Portfolio token={token} userId={userId} />
           <Routes>
             <Route exact path='/portfolio' element={<Portfolio token={token} userId={userId} />}></Route>
           </Routes>*/}
