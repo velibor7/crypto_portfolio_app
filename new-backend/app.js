@@ -49,7 +49,6 @@ app.get("/realtime-price", function (req, res) {
 
 
 
-    // `mongodb+srv://velibor:znhpEduQFqVzy8jt@cluster0.eddqh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 mongoose
   .connect(
     `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PW}@cluster0.eddqh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
@@ -62,12 +61,3 @@ mongoose
     console.log("failed to connect to db");
     console.log(err);
   });
-
-
-// app.listen(PORT, function () {
-  // console.log(`Server is running on ${PORT}`);
-// });
-
-// znhpEduQFqVzy8jt
-
-// mongodb+srv://velibor:<password>@cluster0.eddqh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
